@@ -3,8 +3,13 @@ import RPi.GPIO as GPIO
 import time
 import curses
 
-steps = [[1,0,0,0] , [0,1,0,0] , [0,0,1,0] , [0,0,0,1]]
 
+steps = [[1,0,0,0] , [1,1,0,0], [0,1,0,0] , [0,1,1,0] , [0,0,1,0] ,[0,0,1,1] , [0,0,0,1] , [1,0,0,1]]
+num_steps = 8
+steps1 = [[1,0,0,0] , [0,1,0,0] , [0,0,1,0] , [0,0,0,1] ]
+num_steps1 = 4
+
+gear = 1
 def initialize():
     GPIO.setmode(GPIO.BOARD)
     
@@ -18,25 +23,43 @@ class motor:
             GPIO.output(p,GPIO.LOW)
 
     def movemotor(self,dir):
-        if dir < 0 :
-            if self.position > 0:
-                self.position = self.position - 1
+        if (gear == 1):
+            if dir < 0 :
+                if self.position > 0:
+                    self.position = self.position - 1
+                else:
+                    self.position = (num_steps - 1)
             else:
-                self.position = 3
+                if self.position >= (num_steps - 1):
+                    self.position = 0
+                else:
+                    self.position = self.position  + 1
+            for pos in range(0,4):
+                if steps[self.position][pos] == 0:
+                    GPIO.output(self.pin[pos],GPIO.LOW)
+                else:
+                    GPIO.output(self.pin[pos],GPIO.HIGH)
         else:
-            if self.position > 2:
-                self.position = 0
+            if dir < 0 :
+                if self.position > 0:
+                    self.position = self.position - 1
+                else:
+                    self.position = (num_steps1 - 1)
             else:
-                self.position = self.position  + 1
-        for pos in range(0,4):
-            if steps[self.position][pos] == 0:
-                GPIO.output(self.pin[pos],GPIO.LOW)
-            else:
-                GPIO.output(self.pin[pos],GPIO.HIGH)
+                if self.position >= (num_steps1 - 1):
+                    self.position = 0
+                else:
+                    self.position = self.position  + 1
+            for pos in range(0,4):
+                if steps1[self.position][pos] == 0:
+                    GPIO.output(self.pin[pos],GPIO.LOW)
+                else:
+                    GPIO.output(self.pin[pos],GPIO.HIGH)
                
         
 def main():
     print("Robot Initialize\n")
+    gear = 1
     GPIO.setwarnings(False)
     initialize()
     motorbl = motor()
@@ -69,42 +92,48 @@ def main():
         if char != -1:
             if char == 113: break
             elif char == curses.KEY_RIGHT:
-                countfl = -10 
-                countbl = -10
-                countfr = 10 
-                countbr = 10 
+                countfl = -20 
+                countbl = -20
+                countfr = 20 
+                countbr = 20 
                 
             elif char == curses.KEY_LEFT:
-                countfl = 10 
-                countbl = 10
-                countfr = -10 
-                countbr = -10 
+                countfl = 20 
+                countbl = 20
+                countfr = -20 
+                countbr = -20 
             elif char == curses.KEY_UP:
-                countfl = 10 
-                countbl = 10
-                countfr = 10 
-                countbr = 10 
+                countfl = 20 
+                countbl = 20
+                countfr = 20 
+                countbr = 20 
             elif char == curses.KEY_DOWN:
-                countfl = -10 
-                countbl = -10
-                countfr = -10 
-                countbr = -10 
+                countfl = -20 
+                countbl = -20
+                countfr = -20 
+                countbr = -20 
             elif char == 49: 
-                countfl = 10 
+                countfl = 20 
             elif char == 50 :
-                countbl = 10 
+                countbl = 20 
             elif char == 51 :
-                countfr = 10 
+                countfr = 20 
             elif char == 52 :
-                countbr = 10 
+                countbr = 20 
             elif char == 53: 
-                countfl = -10 
+                countfl = -20 
             elif char == 54 :
-                countbl = -10 
+                countbl = -20 
             elif char == 55 :
-                countfr = -10 
+                countfr = -20 
             elif char == 56 :
-                countbr = -10 
+                countbr = -20 
+            elif char == 103: # G
+                if gear == 1:
+                    gear = 0
+                else:
+                    gear = 1   
+                print ("Gear ", gear)
             else:
                 print(char)
         
